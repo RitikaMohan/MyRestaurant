@@ -44,7 +44,10 @@ fun AppNavGraph(
             CuisineScreen(
                 cuisineId = cuisineId,
                 cartViewModel = cartViewModel,
-                onBackClick = { navController.popBackStack() }
+                onBackClick = { navController.popBackStack() },
+                onCartClick = {
+                    navController.navigate(NavRoutes.CART)
+                }
             )
         }
 

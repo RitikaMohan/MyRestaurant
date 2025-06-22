@@ -36,6 +36,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,6 +54,7 @@ import com.example.myrestaurant.domain.model.Cuisine
 import com.example.myrestaurant.domain.model.Dish
 import com.example.myrestaurant.domain.usecase.GetItemListUseCase
 import com.example.myrestaurant.presentation.cart.CartViewModel
+import kotlin.random.Random
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -73,6 +75,15 @@ fun HomeScreen(
     val cuisines = viewModel.cuisines
     val isLoading = viewModel.isLoading
     val errorMessage = viewModel.errorMessage
+    val loopedList = remember(cuisines) {
+        List(100) { cuisines }.flatten()
+    }
+
+    val scrollState = rememberLazyListState()
+
+    LaunchedEffect(Unit) {
+        scrollState.scrollToItem(loopedList.size / 2)
+    }
 
 
     Scaffold(
@@ -85,7 +96,7 @@ fun HomeScreen(
                 ),
                 actions = {
                     IconButton(onClick = onLanguageToggle) {
-                        Icon(Icons.Default.Translate, contentDescription = "Language")
+                        Icon(Icons.Default.Translate, contentDescription = "Language", tint = Color.White)
                     }
                 }
             )
@@ -93,7 +104,9 @@ fun HomeScreen(
     ) { padding ->
         Box(modifier = Modifier.padding(padding)) {
             when {
-                isLoading -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                isLoading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
                 errorMessage != null -> Text(
                     text = errorMessage,
                     modifier = Modifier.align(Alignment.Center)
@@ -103,11 +116,12 @@ fun HomeScreen(
                     Column(modifier= Modifier.fillMaxSize()) {
                         // Segment 1: Cuisine Horizontal Scroll
                         LazyRow(
+                            state = scrollState,
                             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
                             flingBehavior = rememberSnapFlingBehavior(lazyListState = rememberLazyListState())
                         ) {
-                            items(cuisines, key = { it.id }) { cuisine ->
+                            items(loopedList, key = { it.id + Random.nextInt() }) { cuisine ->
                                 CuisineCard(
                                     cuisine = cuisine,
                                     modifier = Modifier
@@ -122,7 +136,7 @@ fun HomeScreen(
 
                         // Top 3 Dishes (Segment 2)
                         val topDishes =
-                            cuisines.flatMap { it.dishes }.sortedByDescending { it.rating }.take(5)
+                            cuisines.flatMap { it.dishes }.sortedByDescending { it.rating }.take(10)
                         Text(
                             text = stringResource(R.string.topDishes),
                             style = MaterialTheme.typography.titleMedium,

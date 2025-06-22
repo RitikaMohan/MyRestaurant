@@ -8,13 +8,17 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -24,6 +28,7 @@ import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -65,117 +70,123 @@ fun CartScreen(
     val (subtotal, tax, total) = viewModel.getSummary()
     val isLoading = viewModel.isLoading
     var showSuccessDialog by remember { mutableStateOf(false) }
+    val scrollState = rememberScrollState()
 
-    Scaffold(
-        bottomBar = {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-                    .background(Color.Black),
-                contentAlignment = Alignment.Center
-            ) {
-                TextButton(onClick = {
-                    viewModel.placeOrder()
-                    showSuccessDialog = true
-                }) {
-                    Text(text = stringResource(R.string.order), color = Color.White)
-                }
-            }
-        },
-        topBar = {
-            TopAppBar(
-                title = { Text(text = stringResource(R.string.cart)) },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF6200EE), // Purple background
-                    titleContentColor = Color.White     // Optional: white title text
-                ),
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+    Box(modifier = Modifier.fillMaxSize()) {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text(text = stringResource(R.string.cart)) },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color(0xFF6200EE),
+                        titleContentColor = Color.White
+                    ),
+                    navigationIcon = {
+                        IconButton(onClick = onBackClick) {
+                            Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        }
                     }
+                )
+            },
+            containerColor = MaterialTheme.colorScheme.background
+        ) { padding ->
+            if (isLoading) {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
                 }
-            )
-        }
-    ) { padding ->
-        if (isLoading) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
-        } else {
-            Column(
-                modifier = Modifier
-                    .padding(padding)
-                    .padding(16.dp)
-            ) {
+            } else {
                 if (cartItems.isEmpty()) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(text = stringResource(R.string.cartEmpty), style = MaterialTheme.typography.titleMedium)
                     }
-                } else {
-                    cartItems.forEach { item ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            // ✅ Dish Image
-                            AsyncImage(
-                                model = item.dish.imageUrl,
-                                contentDescription = item.dish.name,
+                }else {
+                Column(
+                    modifier = Modifier.fillMaxSize()
+                        .padding(padding)
+                        .padding(horizontal = 16.dp)
+                        .verticalScroll(scrollState)
+                        .padding(bottom = 100.dp)
+                ) {
+                        cartItems.forEach { item ->
+                            Row(
                                 modifier = Modifier
-                                    .size(64.dp)
-                                    .clip(RoundedCornerShape(8.dp)),
-                                contentScale = ContentScale.Crop
-                            )
-
-                            Spacer(modifier = Modifier.width(12.dp))
-
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = item.dish.name,
-                                    style = MaterialTheme.typography.titleMedium
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                AsyncImage(
+                                    model = item.dish.imageUrl,
+                                    contentDescription = item.dish.name,
+                                    modifier = Modifier
+                                        .size(64.dp)
+                                        .clip(RoundedCornerShape(8.dp)),
+                                    contentScale = ContentScale.Crop
                                 )
-                                Text(
-                                    text = "₹${item.dish.price} x ${item.quantity}",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = Color.Gray
-                                )
-                            }
 
-                            // ✅ Quantity Controls
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                IconButton(onClick = { viewModel.removeFromCart(item.dish) }) {
-                                    Icon(Icons.Default.Remove, contentDescription = "Remove")
+                                Spacer(modifier = Modifier.width(12.dp))
+
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = item.dish.name,
+                                        style = MaterialTheme.typography.titleMedium
+                                    )
+                                    Text(
+                                        text = "₹${item.dish.price} x ${item.quantity}",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = Color.Gray
+                                    )
                                 }
-                                Text(text = item.quantity.toString(), modifier = Modifier.width(24.dp), textAlign = TextAlign.Center)
-                                IconButton(onClick = { viewModel.addToCart(item.dish) }) {
-                                    Icon(Icons.Default.Add, contentDescription = "Add")
+
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    IconButton(onClick = { viewModel.removeFromCart(item.dish) }) {
+                                        Icon(Icons.Default.Remove, contentDescription = "Remove")
+                                    }
+                                    Text(
+                                        text = item.quantity.toString(),
+                                        modifier = Modifier.width(24.dp),
+                                        textAlign = TextAlign.Center
+                                    )
+                                    IconButton(onClick = { viewModel.addToCart(item.dish) }) {
+                                        Icon(Icons.Default.Add, contentDescription = "Add")
+                                    }
                                 }
                             }
                         }
+
+                        Spacer(Modifier.height(16.dp))
+                        Divider()
+
+                        CartTotalSection(subtotal, tax, total)
                     }
-
-                    Spacer(Modifier.height(16.dp))
-
-                    Divider()
-
-                    CartTotalSection(
-                        subtotal = subtotal,
-                        tax = tax,
-                        total = total
-                    )
                 }
             }
         }
-    }
-    if (showSuccessDialog) {
-        OrderSuccessDialog {
-            showSuccessDialog = false
+
+        if (cartItems.isNotEmpty()) {
+            Button(
+                onClick = {
+                    viewModel.placeOrder()
+                    showSuccessDialog = true
+                },
+                modifier = Modifier.fillMaxWidth()
+                    .align(Alignment.BottomCenter)
+                    .padding(16.dp)
+                    .navigationBarsPadding(),
+                shape = RoundedCornerShape(50),
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
+            ) {
+                Text(text = stringResource(R.string.order), color = Color.White)
+            }
+        }
+
+        if (showSuccessDialog) {
+            OrderSuccessDialog {
+                showSuccessDialog = false
+            }
         }
     }
 }
+
 
 @Composable
 fun CartTotalSection(
@@ -189,7 +200,6 @@ fun CartTotalSection(
         .fillMaxWidth()
         .padding(vertical = 8.dp)) {
 
-        // ✅ Show subtotal & tax above total when expanded
         AnimatedVisibility(visible = expanded) {
             Column(modifier = Modifier.padding(bottom = 8.dp)) {
                 Text(
@@ -204,7 +214,6 @@ fun CartTotalSection(
             }
         }
 
-        // ✅ Total remains at the bottom
         Row(
             modifier = Modifier
                 .fillMaxWidth()

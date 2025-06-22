@@ -9,8 +9,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -35,6 +37,7 @@ import com.example.myrestaurant.presentation.home.DishTile
 fun CuisineScreen(
     cuisineId: String,
     onBackClick: () -> Unit,
+    onCartClick: () -> Unit,
     cartViewModel: CartViewModel
 ) {
     val viewModel = remember {
@@ -69,17 +72,18 @@ fun CuisineScreen(
             )
         }
     ) { padding ->
+        Box(modifier = Modifier.padding(padding).fillMaxSize()) {
         when {
             isLoading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
+
             error != null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text(text = error)
             }
             else -> {
                 LazyColumn(
                     modifier = Modifier
-                        .padding(padding)
                         .padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
@@ -96,8 +100,18 @@ fun CuisineScreen(
                         }
                     )
                 }
-            }
 
+                // Cart Button (Segment 3)
+                FloatingActionButton(
+                    onClick = onCartClick,
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(16.dp)
+                ) {
+                    Icon(imageVector = Icons.Default.ShoppingCart, contentDescription = "Cart")
+                }
+            }
+        }
         }
     }
 }
