@@ -1,3 +1,13 @@
 <resources>
-    <string name="app_name">MyRestaurant</string>
+    <string name="app_name" translatable="false">MyRestaurant</string>
+    <string name="home">Home</string>
+    <string name="cart">Your Cart</string>
+    <string name="order">Order Now</string>
+    <string name="cartEmpty">Your cart is empty</string>
+    <string name="subTotal">Sub Total</string>
+    <string name="tax">Tax</string>
+    <string name="total">Total</string>
+    <string name="orderSuccess">Order Successful</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="topDishes">Top Dishes</string>
 </resources>

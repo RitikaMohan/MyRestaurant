@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+    <string name="home">होम</string>
+    <string name="cart">आपकी कार्ट</string>
+    <string name="order">आर्डर करें</string>
+    <string name="cartEmpty">आपकी कार्ट खाली है</string>
+    <string name="subTotal">उप-योग</string>
+    <string name="tax">टैक्स</string>
+    <string name="total">कुल खर्च</string>
+    <string name="orderSuccess">ऑर्डर सफल</string>
+    <string name="dismiss">पीछे जाएं</string>
+    <string name="topDishes">सर्वोच्च व्यंजन</string>
+</resources>
